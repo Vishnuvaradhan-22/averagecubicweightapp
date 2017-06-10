@@ -1,5 +1,6 @@
 package com.kogan.cwcalculator;
 
+import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -9,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -30,12 +32,13 @@ public class MainActivity extends AppCompatActivity {
     private TextView label;
     private TextView resultView;
     private Button back;
-
+    private ProgressDialog progressDialog;
     private String baseUrl;
     private HashMap<Integer,AirConditioner> airConditioners;
     private double conversionFactor;
     private String productName;
     private Random random;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             String requestEndPoint = "/api/products/1";
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setTitle("Loading");
+            progressDialog.setMessage("Loading "+productName + " details!");
+            progressDialog.show();
             triggerAPIRequest(requestEndPoint);
         }
     };
@@ -89,7 +97,17 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                NetworkResponse response = error.networkResponse;
+                if(response !=null && response.data != null){
+                        switch(response.statusCode){
+                            case 500:
+                                Toast.makeText(MainActivity.this,"Something went wrong, try again later",Toast.LENGTH_LONG).show();
+                                break;
+                            case 404:
+                                Toast.makeText(MainActivity.this,"Requested Page Not Found",Toast.LENGTH_LONG).show();
+                                break;
+                        }
+                }
             }
         });
 
@@ -135,18 +153,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void calculateAverageCubicWeight(){
-        double sum = 0;
-        for(Map.Entry<Integer,AirConditioner> entry : airConditioners.entrySet()){
-            AirConditioner tempAirConditioner = (AirConditioner)entry.getValue();
-            Log.d(entry.getKey()+"",tempAirConditioner.getCubicWeight()+"");
-            sum += tempAirConditioner.getCubicWeight();
-        }
 
-        resultView.setText(String.format("%.2f",sum/airConditioners.size())+"kg");
-        resultView.setVisibility(View.VISIBLE);
-        label.setVisibility(View.VISIBLE);
-        triggerApi.setVisibility(View.INVISIBLE);
-        back.setVisibility(View.VISIBLE);
+        if(airConditioners.size()>0){
+            double sum = 0;
+            for(Map.Entry<Integer,AirConditioner> entry : airConditioners.entrySet()){
+                AirConditioner tempAirConditioner = (AirConditioner)entry.getValue();
+                Log.d(entry.getKey()+"",tempAirConditioner.getCubicWeight()+"");
+                sum += tempAirConditioner.getCubicWeight();
+            }
+
+            resultView.setText(String.format("%.2f",sum/airConditioners.size())+"kg");
+            progressDialog.dismiss();
+            resultView.setVisibility(View.VISIBLE);
+            label.setVisibility(View.VISIBLE);
+            triggerApi.setVisibility(View.INVISIBLE);
+            back.setVisibility(View.VISIBLE);
+        }
+        else
+            Toast.makeText(MainActivity.this, "Sorry, No "+productName+" available", Toast.LENGTH_SHORT).show();
+
     }
 
     private View.OnClickListener backListener = new View.OnClickListener() {
