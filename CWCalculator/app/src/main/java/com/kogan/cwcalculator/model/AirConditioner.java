@@ -1,4 +1,4 @@
-package com.kogan.cwcalculator;
+package com.kogan.cwcalculator.model;
 
 /**
  * Created by Vish on 10/06/2017.

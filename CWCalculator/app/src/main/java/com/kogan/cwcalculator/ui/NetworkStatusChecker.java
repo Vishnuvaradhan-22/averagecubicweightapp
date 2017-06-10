@@ -1,4 +1,4 @@
-package com.kogan.cwcalculator;
+package com.kogan.cwcalculator.ui;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

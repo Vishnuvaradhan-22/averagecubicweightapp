@@ -1,10 +1,10 @@
-package com.kogan.cwcalculator;
+package com.kogan.cwcalculator.ui;
+
 
 import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,6 +17,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.kogan.cwcalculator.R;
+import com.kogan.cwcalculator.model.AirConditioner;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,10 +35,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView resultView;
     private Button back;
     private ProgressDialog progressDialog;
+
     private String baseUrl;
     private HashMap<Integer,AirConditioner> airConditioners;
     private double conversionFactor;
     private String productName;
+
     private Random random;
 
     @Override
@@ -46,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
         initializeUi();
     }
 
+    /**
+     * Initialize the User Interface
+     */
     private void initializeUi(){
         Toolbar toolbar = (Toolbar)findViewById(R.id.action_menu_bar);
         setSupportActionBar(toolbar);
@@ -72,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Please connect to internet", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * On Click listener for api trigger button. Connects to API and fetch data.
+     */
     private View.OnClickListener apiTriggerListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -85,6 +95,10 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Triggers API GET request through Android - Volley.
+     * @param endPoint: URL end point, concatenated with base URL to get complete URL.
+     */
     private void triggerAPIRequest(String endPoint){
 
         final RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
@@ -115,13 +129,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Parse the JSON response, invoke triggerAPIRequest method if the next end point is not null.
+     * If the next end point is null, invokes average cubic weight calculation.
+     * @param response: JSON response from the GET request.
+     */
     private void extractDataFromResponse(JSONObject response){
         try {
             if(response.has("objects")){
                 JSONArray objectsReceived = (JSONArray) response.get("objects");
                 for(int i =0; i < objectsReceived.length(); i++){
                     JSONObject productJson  = (JSONObject) objectsReceived.get(i);
-                    Log.d("Category - "+i,productJson.getString("category"));
+
                     if(productJson.getString("category").equals(productName)){
                         AirConditioner airConditioner = new AirConditioner();
                         JSONObject size = (JSONObject)productJson.get("size");
@@ -152,13 +171,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Calculates the average cubic weight from Hashmap.
+     * Update the user interface with the result.
+     */
     private void calculateAverageCubicWeight(){
 
         if(airConditioners.size()>0){
             double sum = 0;
             for(Map.Entry<Integer,AirConditioner> entry : airConditioners.entrySet()){
                 AirConditioner tempAirConditioner = (AirConditioner)entry.getValue();
-                Log.d(entry.getKey()+"",tempAirConditioner.getCubicWeight()+"");
                 sum += tempAirConditioner.getCubicWeight();
             }
 
@@ -174,6 +196,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * On click listener for back button.
+     */
     private View.OnClickListener backListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
