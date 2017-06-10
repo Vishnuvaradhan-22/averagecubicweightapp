@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private Button triggerApi;
     private TextView label;
     private TextView resultView;
+    private Button back;
 
     private String baseUrl;
     private HashMap<Integer,AirConditioner> airConditioners;
@@ -50,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
         boolean networkStatus = NetworkStatusChecker.getNetworkConnectivity(this);
 
         if(networkStatus){
-            triggerApi = (Button)findViewById(R.id.button);
+            triggerApi = (Button)findViewById(R.id.btn_trigger_api);
+            back = (Button)findViewById(R.id.btn_back);
             label = (TextView)findViewById(R.id.tv_label);
             resultView = (TextView)findViewById(R.id.tv_avgcw);
 
@@ -59,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
             conversionFactor = 250;
             productName = "Air Conditioners";
             baseUrl = "http://wp8m3he1wt.s3-website-ap-southeast-2.amazonaws.com";
+
             triggerApi.setOnClickListener(apiTriggerListener);
+            back.setOnClickListener(backListener);
         }
         else
             Toast.makeText(this, "Please connect to internet", Toast.LENGTH_SHORT).show();
@@ -142,6 +146,17 @@ public class MainActivity extends AppCompatActivity {
         resultView.setVisibility(View.VISIBLE);
         label.setVisibility(View.VISIBLE);
         triggerApi.setVisibility(View.INVISIBLE);
+        back.setVisibility(View.VISIBLE);
     }
 
+    private View.OnClickListener backListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            resultView.setVisibility(View.INVISIBLE);
+            label.setVisibility(View.INVISIBLE);
+            back.setVisibility(View.INVISIBLE);
+            triggerApi.setVisibility(View.VISIBLE);
+            airConditioners.clear();
+        }
+    };
 }

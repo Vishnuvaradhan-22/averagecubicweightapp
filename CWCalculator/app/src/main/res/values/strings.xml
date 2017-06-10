@@ -3,4 +3,5 @@
     <string name="product_name">Air Conditioners</string>
     <string name="button_label">Fetch Average Cubic Weight</string>
     <string name="text_label">Average Cubic Weight</string>
+    <string name="label_back">Back</string>
 </resources>
